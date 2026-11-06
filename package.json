@@ -42,7 +42,7 @@
     "@types/react-dom": "^19",
     "@types/three": "^0.187.0",
     "drizzle-kit": "^0.31.11",
-    "eslint": "^9",
+    "eslint": "^10",
     "eslint-config-next": "16.4.5",
     "tsx": "^4.23.15",
     "typescript": "^5",
