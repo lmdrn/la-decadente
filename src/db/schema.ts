@@ -10,6 +10,7 @@ import {
   jsonb,
   primaryKey,
   index,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 export const roleEnum = pgEnum("role", ["admin", "moderator", "contributor"]);
@@ -172,6 +173,19 @@ export const moderationLog = pgTable("moderation_log", {
   by: text("by").notNull(), // "auto" | "filtre" | id de l'admin
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/** Mots du filtre de modération : en base, jamais dans le code public. */
+export const filterTermKind = pgEnum("filter_term_kind", ["blocked", "phrase", "sensitive"]);
+export const filterTerms = pgTable(
+  "filter_terms",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    term: text("term").notNull(), // déjà normalisé (minuscules, sans accents)
+    kind: filterTermKind("kind").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("filter_terms_uniq").on(t.term, t.kind)],
+);
 
 export const counters = pgTable("counters", {
   key: text("key").primaryKey(),

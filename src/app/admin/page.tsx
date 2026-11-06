@@ -50,7 +50,10 @@ export default async function AdminPage() {
   return (
     <Window title="La Décadente / administration" menu={mainMenu(t)}>
       <div className="sunk prose" style={{ margin: 10, maxWidth: "none" }}>
-        <h2 style={{ marginTop: 0 }}>À vérifier ({toReview.length})</h2>
+        <p style={{ marginTop: 0 }}>
+          <Link className="b" href="/admin/filtre">Mots filtrés</Link>
+        </p>
+        <h2>À vérifier ({toReview.length})</h2>
         <p className="mu">Publiés, mais le filtre a repéré un mot sensible (souvent réapproprié). Vérifie le contexte.</p>
         {toReview.length === 0 ? <p>Rien à vérifier.</p> : (
           <ul>

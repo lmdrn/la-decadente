@@ -32,12 +32,13 @@ npm run dev                   # http://localhost:3000
 | `npm run db:purge-demo` | Supprime tous les événements fictifs de démo |
 | `npm run venues:geocode` | Ajoute les coordonnées (carte) aux lieux qui n'en ont pas |
 | `npm run admin:create -- email "Nom"` | Crée un compte admin, ou passe un compte existant admin |
+| `npm run filter:export` / `filter:import` | Sauvegarde / restaure les mots du filtre (fichier privé `filtre.local.json`) |
 
 ## Où est quoi
 
 - `src/app/` : les pages (agenda `page.tsx`, `evenement/`, `lieu/`, `collectif/`, `lieux/`, `carte/`, `ajouter/`, `admin/`, `charte/`, `a-propos/`, `contact/`, `merci/`)
 - `src/components/` : fenêtre, barre des tâches et menu Démarrer, apparence, trou noir (`BlackHole.tsx`), logo (`Devil.tsx`)
-- `src/lib/blocklist.ts` : **les mots du filtre de modération** (à compléter au fil du temps)
+- `src/lib/moderation.ts` : la logique du filtre de modération (les mots, eux, sont en base de données)
 - `src/lib/geocode.ts` : la zone couverte (refus à l'ouest de Morges)
 - `src/lib/taxonomy.ts` : types d'événements, genres musicaux, accessibilité
 - `src/db/schema.ts` : la base de données
@@ -46,7 +47,10 @@ npm run dev                   # http://localhost:3000
 ## Modération
 
 - Les ajouts demandent un compte et sont publiés tout de suite.
-- Un filtre de mots refuse les insultes et slogans haineux (`BLOCKED`, `BLOCKED_PHRASES`) et signale à l'admin les mots souvent réappropriés (`SENSITIVE`).
+- Un filtre de mots refuse les insultes et slogans haineux et signale à l'admin les mots souvent réappropriés.
+- **Les mots du filtre ne sont jamais dans le code** : ils sont en base de données et se gèrent dans `/admin/filtre`.
+  Sauvegarde privée : `npm run filter:export` écrit `filtre.local.json` (ignoré par git, à garder pour toi).
+  Sur un nouveau serveur : copie ce fichier puis `npm run filter:import`.
 - L'admin (et les personnes avec le rôle « modération ») peut supprimer depuis `/admin`. Les rôles se donnent dans `/admin`.
 
 ## Sécurité

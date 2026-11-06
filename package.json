@@ -17,7 +17,9 @@
     "venues:geocode": "tsx --env-file=.env scripts/geocode-venues.ts",
     "test": "vitest run",
     "audit:prod": "npm audit --omit=dev --audit-level=low",
-    "check": "tsc --noEmit && eslint src scripts tests && vitest run && npm audit --omit=dev --audit-level=low"
+    "check": "tsc --noEmit && eslint src scripts tests && vitest run && npm audit --omit=dev --audit-level=low",
+    "filter:export": "tsx --env-file=.env scripts/filter.ts export",
+    "filter:import": "tsx --env-file=.env scripts/filter.ts import"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

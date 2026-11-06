@@ -4,9 +4,11 @@ import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db";
-import { collectives, contactMessages, events, moderationLog, users, venues } from "@/db/schema";
+import { collectives, contactMessages, events, filterTerms, moderationLog, users, venues } from "@/db/schema";
 import { requireAdmin, requireModerator } from "@/lib/auth";
 import { deleteEventImage } from "@/lib/images";
+import { normalize } from "@/lib/moderation";
+import { clearFilterCache } from "@/lib/moderation-server";
 
 const id = z.string().uuid();
 
@@ -81,4 +83,25 @@ export async function removeEventImage(fd: FormData) {
   await db.update(events).set({ imageUrl: null, updatedAt: new Date() }).where(eq(events.id, eid));
   await db.insert(moderationLog).values({ kind: "image", refId: eid, decision: "removed", by: me.id });
   revalidatePath("/admin");
+}
+
+export async function addFilterTerm(fd: FormData) {
+  await requireModerator();
+  const kind = z.enum(["blocked", "phrase", "sensitive"]).parse(fd.get("kind"));
+  const raw = String(fd.get("term") ?? "").slice(0, 2000);
+  // une ligne par mot : on peut en coller plusieurs d'un coup
+  const terms = [...new Set(raw.split(/[\n,;]/).map((t) => normalize(t)).filter((t) => t.length >= 2))];
+  for (const term of terms) {
+    if (kind !== "phrase" && term.includes(" ")) continue; // un mot seul, sinon c'est une expression
+    await db.insert(filterTerms).values({ term, kind }).onConflictDoNothing();
+  }
+  clearFilterCache();
+  revalidatePath("/admin/filtre");
+}
+
+export async function removeFilterTerm(fd: FormData) {
+  await requireModerator();
+  await db.delete(filterTerms).where(eq(filterTerms.id, id.parse(fd.get("id"))));
+  clearFilterCache();
+  revalidatePath("/admin/filtre");
 }

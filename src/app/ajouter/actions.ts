@@ -6,7 +6,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { collectives, eventCollectives, events, moderationLog, venues } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
-import { moderate } from "@/lib/moderation";
+import { moderate } from "@/lib/moderation-server";
 import { rateLimited } from "@/lib/request";
 import { slugify } from "@/lib/slug";
 import { zurichToDate } from "@/lib/dates";
@@ -76,7 +76,7 @@ export async function addEvent(_prev: AddState, fd: FormData): Promise<AddState>
   }
   const d = p.data;
 
-  const mod = moderate(d.title, d.lineup, d.description, d.newCollective, d.priceLabel);
+  const mod = await moderate(d.title, d.lineup, d.description, d.newCollective, d.priceLabel);
   if (mod.decision === "rejected") {
     await db.insert(moderationLog).values({ kind: "event", decision: "rejected", reasons: mod.flags, by: "filtre" });
     return { error: REFUS, values };
@@ -188,7 +188,7 @@ export async function addVenue(_prev: AddState, fd: FormData): Promise<AddState>
     return { error: msgs[k] ?? "Vérifie le formulaire.", values };
   }
   const d = p.data;
-  const mod = moderate(d.name, d.description);
+  const mod = await moderate(d.name, d.description);
   if (mod.decision === "rejected") {
     await db.insert(moderationLog).values({ kind: "venue", decision: "rejected", reasons: mod.flags, by: "filtre" });
     return { error: REFUS, values };

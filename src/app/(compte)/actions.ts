@@ -7,7 +7,7 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { DUMMY_HASH, clearFailures, createSession, hashPassword, recordFailure, tooManyAttempts, verifyPassword } from "@/lib/auth";
 import { clientIp, rateLimited, safeNext } from "@/lib/request";
-import { moderate } from "@/lib/moderation";
+import { moderate } from "@/lib/moderation-server";
 
 export type FormState = { error?: string; fields?: Record<string, string> };
 
@@ -33,7 +33,7 @@ export async function register(_prev: FormState, fd: FormData): Promise<FormStat
       "Tu dois accepter la charte pour créer un compte.";
     return { error: msg, fields };
   }
-  if (moderate(p.data.displayName).decision === "rejected") return { error: "Ce pseudo ne respecte pas la charte.", fields };
+  if ((await moderate(p.data.displayName)).decision === "rejected") return { error: "Ce pseudo ne respecte pas la charte.", fields };
   const exists = await db.select({ id: users.id }).from(users).where(eq(users.email, p.data.email)).limit(1);
   if (exists[0]) return { error: "Un compte existe déjà avec cet email. Connecte-toi.", fields };
   const [u] = await db

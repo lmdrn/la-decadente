@@ -45,3 +45,6 @@ next-env.d.ts
 
 # photos envoyées
 /uploads/
+
+# mots du filtre de modération (privé)
+filtre.local.json
