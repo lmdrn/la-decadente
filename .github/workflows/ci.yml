@@ -1,0 +1,55 @@
+# Tests et contrôles de sécurité : à chaque modification, et chaque lundi matin
+# (pour repérer les nouvelles failles publiées dans les dépendances).
+name: Contrôles
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: decadente
+          POSTGRES_PASSWORD: decadente
+          POSTGRES_DB: decadente
+        ports: ["5433:5432"]
+        options: >-
+          --health-cmd "pg_isready -U decadente" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://decadente:decadente@localhost:5433/decadente
+      APP_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Types, lint, tests, failles connues
+        run: npm run check
+      - name: Base de données (migrations)
+        run: npx drizzle-kit migrate
+      - name: Build de production
+        run: npm run build
+
+  codeql:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+      - uses: github/codeql-action/analyze@v3

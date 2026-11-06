@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: decadente
+      POSTGRES_PASSWORD: decadente
+      POSTGRES_DB: decadente
+    ports:
+      - "5433:5432"
+    volumes:
+      - decadente-db:/var/lib/postgresql/data
+
+volumes:
+  decadente-db:

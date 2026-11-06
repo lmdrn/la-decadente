@@ -1,0 +1,49 @@
+{
+  "name": "decadente",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "db:up": "docker compose up -d",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "node --env-file=.env ./node_modules/.bin/drizzle-kit migrate",
+    "db:seed": "tsx --env-file=.env scripts/seed.ts",
+    "db:purge-demo": "tsx --env-file=.env scripts/purge-demo.ts",
+    "admin:create": "tsx --env-file=.env scripts/create-admin.ts",
+    "typecheck": "tsc --noEmit",
+    "venues:geocode": "tsx --env-file=.env scripts/geocode-venues.ts",
+    "test": "vitest run",
+    "audit:prod": "npm audit --omit=dev --audit-level=low",
+    "check": "tsc --noEmit && eslint src scripts tests && vitest run && npm audit --omit=dev --audit-level=low"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "drizzle-orm": "^0.45.4",
+    "leaflet": "^1.9.4",
+    "next": "16.4.5",
+    "pg": "^8.23.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "^0.0.1",
+    "sharp": "^0.35.5",
+    "three": "^0.187.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.22",
+    "@types/node": "^20",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/three": "^0.187.0",
+    "drizzle-kit": "^0.31.11",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.5",
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vitest": "^3.2.7"
+  }
+}
